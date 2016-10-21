@@ -10,11 +10,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{75F9E989-1DE4-4B7D-B0C8-11916196D12F}</ProjectGuid>
+    <ProjectGuid>{9460AEB7-E6FC-4D88-A34B-C44ABF8353CC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CSafeDetector.Vsix</RootNamespace>
-    <AssemblyName>CSafeDetector.Vsix</AssemblyName>
+    <RootNamespace>CSafeRefactoring.Vsix</RootNamespace>
+    <AssemblyName>CSafeRefactoring.Vsix</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
@@ -23,6 +23,7 @@
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <VSSDKTargetPlatformRegRootSuffix>Roslyn</VSSDKTargetPlatformRegRootSuffix>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,9 +53,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CSafeDetector\CSafeDetector.csproj">
-      <Project>{F7C07965-6FC1-4C11-A629-1F4D9EC45878}</Project>
-      <Name>CSafeDetector</Name>
+    <ProjectReference Include="..\CSafeRefactoring\CSafeRefactoring.csproj">
+      <Project>{aa7bcebd-6b96-4b34-b8d7-611aa658940d}</Project>
+      <Name>CSafeRefactoring</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
