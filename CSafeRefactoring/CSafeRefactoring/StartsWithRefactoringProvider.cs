@@ -2,15 +2,19 @@ using System.Composition;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeRefactorings;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSafeRefactoring
 {
     [ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(StartsWithRefactoringProvider)), Shared]
-    public class StartsWithRefactoringProvider : CodeRefactoringProvider
+    public class StartsWithRefactoringProvider : StartsWithRefactoringBase
     {
-        public override Task ComputeRefactoringsAsync(CodeRefactoringContext context)
+        protected override string MethodToReplaceName => "StartsWithCSafe";
+        protected override bool IgnoreCase => false;
+
+        protected override bool AnalyzeAdditionalRestrictions(InvocationExpressionSyntax invocationExpr)
         {
-            throw new System.NotImplementedException();
+            return invocationExpr.ArgumentList.Arguments.Count == 1;
         }
     }
 }

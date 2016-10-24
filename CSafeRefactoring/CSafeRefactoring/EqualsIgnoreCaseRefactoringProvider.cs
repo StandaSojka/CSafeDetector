@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace CSafeRefactoring
 {
     [ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(EqualsIgnoreCaseRefactoringProvider)), Shared]
-    public class EqualsIgnoreCaseRefactoringProvider : CodeRefactoringBase
+    public class EqualsIgnoreCaseRefactoringProvider : EqualsRefactoringBase
     {
         protected override string MethodToReplaceName => "EqualsCSafe";
 

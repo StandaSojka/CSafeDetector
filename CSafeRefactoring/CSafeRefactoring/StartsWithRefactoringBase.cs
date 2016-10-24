@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSafeRefactoring
 {
-    public abstract class CodeRefactoringBase : CodeRefactoringProvider
+    public abstract class StartsWithRefactoringBase : CodeRefactoringProvider
     {
         protected abstract string MethodToReplaceName { get; }
 
@@ -21,36 +21,36 @@ namespace CSafeRefactoring
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
             var node = root.FindNode(context.Span);
 
-            var invocationExpr = node;
-            var fullyQualifiedName = string.Format($"string.{MethodToReplaceName}");
-
-            var semModel = await context.Document.GetSemanticModelAsync(context.CancellationToken);
-            var memberSymbol = semModel.GetSymbolInfo(invocationExpr).Symbol as IMethodSymbol;
-
-            if (memberSymbol != null && !memberSymbol.ToString().StartsWith(fullyQualifiedName))
+            if (node.GetText().ToString() != MethodToReplaceName)
             {
                 return;
             }
 
-            var declaration = root.FindNode(context.Span).Parent.AncestorsAndSelf().OfType<InvocationExpressionSyntax>().First();
+            var declaration =
+                root.FindNode(context.Span).Parent.AncestorsAndSelf().OfType<InvocationExpressionSyntax>().First();
 
             if (!AnalyzeAdditionalRestrictions(declaration))
             {
                 return;
             }
 
-            var messageInvariantCulture = IgnoreCase ? "Use StringComparison.InvariantCultureIgnoreCase" : "Use StringComparison.InvariantCulture";
+            var messageInvariantCulture = IgnoreCase
+                ? "Use StringComparison.InvariantCultureIgnoreCase"
+                : "Use StringComparison.InvariantCulture";
             var messageOrdinal = IgnoreCase ? "Use StringComparison.OrdinalIgnoreCase" : "Use StringComparison.Ordinal";
 
-            var actionIvariantCulture = CodeAction.Create(messageInvariantCulture, c => StringComparisonInvariantCulture(context.Document, declaration, c));
-            var actionOrdinal = CodeAction.Create(messageOrdinal, c => StringComparisonOrdinal(context.Document, declaration, c));
+            var actionIvariantCulture = CodeAction.Create(messageInvariantCulture,
+                c => StringComparisonInvariantCulture(context.Document, declaration, c));
+            var actionOrdinal = CodeAction.Create(messageOrdinal,
+                c => StringComparisonOrdinal(context.Document, declaration, c));
 
             context.RegisterRefactoring(actionIvariantCulture);
             context.RegisterRefactoring(actionOrdinal);
         }
 
 
-        protected async Task<Document> StringComparisonInvariantCulture(Document document, InvocationExpressionSyntax invocationExpr, CancellationToken cancellationToken)
+        protected async Task<Document> StringComparisonInvariantCulture(Document document,
+            InvocationExpressionSyntax invocationExpr, CancellationToken cancellationToken)
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken);
 
@@ -87,8 +87,7 @@ namespace CSafeRefactoring
             var memberAccessExpressionSyntax = invocationExpr.Expression as MemberAccessExpressionSyntax;
             if (memberAccessExpressionSyntax != null)
             {
-                var param1 = memberAccessExpressionSyntax.Expression as IdentifierNameSyntax;
-
+                var param1 = memberAccessExpressionSyntax.Expression;
                 var argumentList = invocationExpr.ArgumentList;
                 var param2 = argumentList.Arguments[0].Expression;
 
@@ -102,7 +101,6 @@ namespace CSafeRefactoring
                 {
                     newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "Ordinal"));
                 }
-
 
                 var newDocument = document.WithSyntaxRoot(newRoot);
 
@@ -118,7 +116,40 @@ namespace CSafeRefactoring
 
         private InvocationExpressionSyntax Create(ExpressionSyntax param1, ExpressionSyntax param2, string type)
         {
-            return SyntaxFactory.InvocationExpression(
+            return
+                SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            param1,
+                            SyntaxFactory.IdentifierName("StartsWith")
+                        )
+                    )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                                new SyntaxNodeOrToken[]
+                                {
+                                    SyntaxFactory.Argument(param2),
+                                    SyntaxFactory.Token(
+                                        SyntaxFactory.TriviaList(),
+                                        SyntaxKind.CommaToken,
+                                        SyntaxFactory.TriviaList(
+                                            SyntaxFactory.Space
+                                        )
+                                    ),
+                                    SyntaxFactory.Argument(
+                                        SyntaxFactory.MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            SyntaxFactory.IdentifierName("StringComparison"),
+                                            SyntaxFactory.IdentifierName(type)
+                                        )
+                                    )
+                                }
+                            )
+                        )
+                    );
+
+            /*return SyntaxFactory.InvocationExpression(
                     SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         SyntaxFactory.PredefinedType(
@@ -158,7 +189,7 @@ namespace CSafeRefactoring
                             }
                         )
                     )
-                );
+                );*/
         }
     }
 }

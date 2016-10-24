@@ -33,7 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CodeRefactoringBase.cs" />
+    <Compile Include="StartsWithRefactoringBase.cs" />
+    <Compile Include="EqualsRefactoringBase.cs" />
     <Compile Include="EqualsIgnoreCaseRefactoringProvider.cs" />
     <Compile Include="StartsWithRefactoringProvider.cs" />
     <Compile Include="EqualsRefactoringProvider.cs" />
