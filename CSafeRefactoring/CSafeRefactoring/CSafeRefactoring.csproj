@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="EndsWithIgnoreCaseRefactoringProvider.cs" />
-    <Compile Include="StartsWithRefactoringBase.cs" />
+    <Compile Include="StartsEndsWithRefactoringBase.cs" />
     <Compile Include="EqualsRefactoringBase.cs" />
     <Compile Include="EqualsIgnoreCaseRefactoringProvider.cs" />
     <Compile Include="StartsWithIgnoreCaseRefactoringProvider.cs" />

@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace CSafeRefactoring
 {
     [ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(EndsWithRefactoringProvider)), Shared]
-    public class EndsWithRefactoringProvider : StartsWithRefactoringBase
+    public class EndsWithRefactoringProvider : StartsEndsWithRefactoringBase
     {
         protected override string MethodToReplaceName => "EndsWithCSafe";
         protected override string NewMethodName => "EndsWith";

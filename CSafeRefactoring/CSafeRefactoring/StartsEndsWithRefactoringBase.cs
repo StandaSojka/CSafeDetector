@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSafeRefactoring
 {
-    public abstract class StartsWithRefactoringBase : CodeRefactoringProvider
+    public abstract class StartsEndsWithRefactoringBase : CodeRefactoringProvider
     {
         protected abstract string MethodToReplaceName { get; }
 
@@ -117,13 +117,13 @@ namespace CSafeRefactoring
         protected abstract bool AnalyzeAdditionalRestrictions(InvocationExpressionSyntax invocationExpr);
 
 
-        private InvocationExpressionSyntax Create(ExpressionSyntax param1, ExpressionSyntax param2, string type)
+        private InvocationExpressionSyntax Create(ExpressionSyntax leftString, ExpressionSyntax rightString, string type)
         {
             return
                 SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            param1,
+                            leftString,
                             SyntaxFactory.IdentifierName(NewMethodName)
                         )
                     )
@@ -132,7 +132,7 @@ namespace CSafeRefactoring
                             SyntaxFactory.SeparatedList<ArgumentSyntax>(
                                 new SyntaxNodeOrToken[]
                                 {
-                                    SyntaxFactory.Argument(param2),
+                                    SyntaxFactory.Argument(rightString),
                                     SyntaxFactory.Token(
                                         SyntaxFactory.TriviaList(),
                                         SyntaxKind.CommaToken,
@@ -151,48 +151,6 @@ namespace CSafeRefactoring
                             )
                         )
                     );
-
-            /*return SyntaxFactory.InvocationExpression(
-                    SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        SyntaxFactory.PredefinedType(
-                            SyntaxFactory.Token(SyntaxKind.StringKeyword)
-                        ),
-                        SyntaxFactory.IdentifierName("Equals")
-                    )
-                )
-                .WithArgumentList(
-                    SyntaxFactory.ArgumentList(
-                        SyntaxFactory.SeparatedList<ArgumentSyntax>(
-                            new SyntaxNodeOrToken[]
-                            {
-                                SyntaxFactory.Argument(param1),
-                                SyntaxFactory.Token(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.CommaToken,
-                                    SyntaxFactory.TriviaList(
-                                        SyntaxFactory.Space
-                                    )
-                                ),
-                                SyntaxFactory.Argument(param2),
-                                SyntaxFactory.Token(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.CommaToken,
-                                    SyntaxFactory.TriviaList(
-                                        SyntaxFactory.Space
-                                    )
-                                ),
-                                SyntaxFactory.Argument(
-                                    SyntaxFactory.MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        SyntaxFactory.IdentifierName("StringComparison"),
-                                        SyntaxFactory.IdentifierName(type)
-                                    )
-                                )
-                            }
-                        )
-                    )
-                );*/
         }
     }
 }

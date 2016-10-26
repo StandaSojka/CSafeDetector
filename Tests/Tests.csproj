@@ -115,7 +115,10 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Base\CodeRefactoringTestFixture.cs" />
+    <Compile Include="EndsWithIgnoreCaseUnitTests.cs" />
     <Compile Include="EqualsIgnoreCaseUnitTests.cs" />
+    <Compile Include="StartsWithIgnoreCaseUnitTests.cs" />
+    <Compile Include="EndsWithUnitTests.cs" />
     <Compile Include="StartsWithUnitTests.cs" />
     <Compile Include="EqualsUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
