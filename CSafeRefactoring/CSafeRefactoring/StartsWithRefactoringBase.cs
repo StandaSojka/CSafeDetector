@@ -14,6 +14,9 @@ namespace CSafeRefactoring
     {
         protected abstract string MethodToReplaceName { get; }
 
+        protected abstract string NewMethodName { get; }
+
+
         protected abstract bool IgnoreCase { get; }
 
         public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
@@ -121,7 +124,7 @@ namespace CSafeRefactoring
                         SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             param1,
-                            SyntaxFactory.IdentifierName("StartsWith")
+                            SyntaxFactory.IdentifierName(NewMethodName)
                         )
                     )
                     .WithArgumentList(

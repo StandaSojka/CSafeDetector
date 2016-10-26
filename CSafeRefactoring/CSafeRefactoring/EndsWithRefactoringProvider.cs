@@ -5,11 +5,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSafeRefactoring
 {
-    [ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(StartsWithRefactoringProvider)), Shared]
-    public class StartsWithRefactoringProvider : StartsWithRefactoringBase
+    [ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(EndsWithRefactoringProvider)), Shared]
+    public class EndsWithRefactoringProvider : StartsWithRefactoringBase
     {
-        protected override string MethodToReplaceName => "StartsWithCSafe";
-        protected override string NewMethodName => "StartsWith";
+        protected override string MethodToReplaceName => "EndsWithCSafe";
+        protected override string NewMethodName => "EndsWith";
 
         protected override bool IgnoreCase => false;
 

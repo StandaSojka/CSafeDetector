@@ -33,12 +33,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="EndsWithIgnoreCaseRefactoringProvider.cs" />
     <Compile Include="StartsWithRefactoringBase.cs" />
     <Compile Include="EqualsRefactoringBase.cs" />
     <Compile Include="EqualsIgnoreCaseRefactoringProvider.cs" />
+    <Compile Include="StartsWithIgnoreCaseRefactoringProvider.cs" />
+    <Compile Include="EndsWithRefactoringProvider.cs" />
     <Compile Include="StartsWithRefactoringProvider.cs" />
     <Compile Include="EqualsRefactoringProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SyntaxTreeCreators\EqualsSyntaxTreeCreator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

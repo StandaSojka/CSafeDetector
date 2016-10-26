@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CSafeRefactoring.SyntaxTreeCreators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSafeRefactoring
@@ -38,120 +37,47 @@ namespace CSafeRefactoring
             var messageInvariantCulture = IgnoreCase ? "Use StringComparison.InvariantCultureIgnoreCase" : "Use StringComparison.InvariantCulture";
             var messageOrdinal = IgnoreCase ? "Use StringComparison.OrdinalIgnoreCase" : "Use StringComparison.Ordinal";
 
-            var actionIvariantCulture = CodeAction.Create(messageInvariantCulture, c => StringComparisonInvariantCulture(context.Document, declaration, c));
-            var actionOrdinal = CodeAction.Create(messageOrdinal, c => StringComparisonOrdinal(context.Document, declaration, c));
+            var actionIvariantCulture = CodeAction.Create(messageInvariantCulture, c => FixDocument(context.Document, declaration, c, "InvariantCulture"));
+            var actionOrdinal = CodeAction.Create(messageOrdinal, c => FixDocument(context.Document, declaration, c, "Ordinal"));
 
             context.RegisterRefactoring(actionIvariantCulture);
             context.RegisterRefactoring(actionOrdinal);
         }
 
 
-        protected async Task<Document> StringComparisonInvariantCulture(Document document, InvocationExpressionSyntax invocationExpr, CancellationToken cancellationToken)
+        protected async Task<Document> FixDocument(Document document, InvocationExpressionSyntax invocationExpressionSyntax, CancellationToken cancellationToken, string type)
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken);
 
-            Debug.WriteLine("root");
-            var memberAccessExpressionSyntax = invocationExpr.Expression as MemberAccessExpressionSyntax;
+            var memberAccessExpressionSyntax = invocationExpressionSyntax.Expression as MemberAccessExpressionSyntax;
             if (memberAccessExpressionSyntax?.Expression == null)
             {
                 return document;
             }
 
-            var param1 = memberAccessExpressionSyntax.Expression;
-            var argumentList = invocationExpr.ArgumentList;
-            var param2 = argumentList.Arguments[0].Expression;
+            var leadingTrivia = memberAccessExpressionSyntax.Expression.GetLeadingTrivia();
+            var leftString = memberAccessExpressionSyntax.Expression.WithoutLeadingTrivia();
+            var rightString = invocationExpressionSyntax.ArgumentList.Arguments[0].Expression;
 
-            SyntaxNode newRoot;
-
-            if (IgnoreCase)
-            {
-                newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "InvariantCultureIgnoreCase"));
-            }
-            else
-            {
-                newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "InvariantCulture"));
-            }
-
+            var newSyntaxTree = CreateNewOrdinalSyntaxTree(leftString, rightString, leadingTrivia, type);
+            var newRoot = root.ReplaceNode(invocationExpressionSyntax, newSyntaxTree);
             return document.WithSyntaxRoot(newRoot);
         }
 
-
-        protected async Task<Document> StringComparisonOrdinal(Document document, InvocationExpressionSyntax invocationExpr, CancellationToken cancellationToken)
+        private InvocationExpressionSyntax CreateNewOrdinalSyntaxTree(ExpressionSyntax leftString, ExpressionSyntax rightString, SyntaxTriviaList leadingTrivia, string type)
         {
-            var root = await document.GetSyntaxRootAsync(cancellationToken);
-
-            var memberAccessExpressionSyntax = invocationExpr.Expression as MemberAccessExpressionSyntax;
-            if (memberAccessExpressionSyntax?.Expression == null)
-            {
-                return document;
-            }
-
-            
-            var param1 = memberAccessExpressionSyntax.Expression;
-            var argumentList = invocationExpr.ArgumentList;
-            var param2 = argumentList.Arguments[0].Expression;
-
-            SyntaxNode newRoot;
-
+            var syntaxTreeCreator = new EqualsSyntaxTreeCreator(leftString, rightString);
             if (IgnoreCase)
             {
-                newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "OrdinalIgnoreCase"));
-            }
-            else
-            {
-                newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "Ordinal"));
+               return syntaxTreeCreator.Create($"{type}IgnoreCase")
+                    .WithLeadingTrivia(leadingTrivia);
             }
 
-            return document.WithSyntaxRoot(newRoot);            
+            return syntaxTreeCreator.Create(type)
+                .WithLeadingTrivia(leadingTrivia);
         }
-
 
         protected abstract bool AnalyzeAdditionalRestrictions(InvocationExpressionSyntax invocationExpr);
 
-
-        private InvocationExpressionSyntax Create(ExpressionSyntax param1, ExpressionSyntax param2, string type)
-        {
-            return SyntaxFactory.InvocationExpression(
-                    SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        SyntaxFactory.PredefinedType(
-                            SyntaxFactory.Token(SyntaxKind.StringKeyword)
-                        ),
-                        SyntaxFactory.IdentifierName("Equals")
-                    )
-                )
-                .WithArgumentList(
-                    SyntaxFactory.ArgumentList(
-                        SyntaxFactory.SeparatedList<ArgumentSyntax>(
-                            new SyntaxNodeOrToken[]
-                            {
-                                SyntaxFactory.Argument(param1),
-                                SyntaxFactory.Token(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.CommaToken,
-                                    SyntaxFactory.TriviaList(
-                                        SyntaxFactory.Space
-                                    )
-                                ),
-                                SyntaxFactory.Argument(param2),
-                                SyntaxFactory.Token(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.CommaToken,
-                                    SyntaxFactory.TriviaList(
-                                        SyntaxFactory.Space
-                                    )
-                                ),
-                                SyntaxFactory.Argument(
-                                    SyntaxFactory.MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        SyntaxFactory.IdentifierName("StringComparison"),
-                                        SyntaxFactory.IdentifierName(type)
-                                    )
-                                )
-                            }
-                        )
-                    )
-                );
-        }
     }
 }
