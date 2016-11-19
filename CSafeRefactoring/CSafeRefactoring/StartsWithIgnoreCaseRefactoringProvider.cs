@@ -9,7 +9,9 @@ namespace CSafeRefactoring
     public class StartsWithIgnoreCaseRefactoringProvider : StartsEndsWithRefactoringBase
     {
         protected override string MethodToReplaceName => "StartsWithCSafe";
+
         protected override string NewMethodName => "StartsWith";
+
         protected override bool IgnoreCase => true;
 
         protected override bool AnalyzeAdditionalRestrictions(InvocationExpressionSyntax invocationExpr)

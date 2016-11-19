@@ -9,6 +9,7 @@ namespace CSafeRefactoring
     public class StartsWithRefactoringProvider : StartsEndsWithRefactoringBase
     {
         protected override string MethodToReplaceName => "StartsWithCSafe";
+
         protected override string NewMethodName => "StartsWith";
 
         protected override bool IgnoreCase => false;

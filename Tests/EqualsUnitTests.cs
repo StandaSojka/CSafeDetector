@@ -122,8 +122,6 @@ public class Ex
             TestCodeRefactoring(markupCode, expected, expected2);
         }
 
-        protected override string LanguageName => Microsoft.CodeAnalysis.LanguageNames.CSharp;
-
         protected override CodeRefactoringProvider CreateProvider()
         {
             return new EqualsRefactoringProvider();

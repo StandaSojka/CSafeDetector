@@ -18,10 +18,11 @@ namespace Tests.Base
         private static readonly MetadataReference C_SHARP_SYMBOLS_REFERENCE = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         private static readonly MetadataReference CODE_ANALYSIS_REFERENCE = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
 
-
         internal static string DefaultFilePathPrefix = "Test";
         internal static string CSharpDefaultFileExt = "cs";
         internal static string TestProjectName = "TestProject";
+
+        protected override string LanguageName => LanguageNames.CSharp;
 
         protected abstract CodeRefactoringProvider CreateProvider();
 

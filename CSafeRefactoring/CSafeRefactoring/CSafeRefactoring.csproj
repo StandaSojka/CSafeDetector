@@ -33,6 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CodeRefactoringProviderBase.cs" />
     <Compile Include="EndsWithIgnoreCaseRefactoringProvider.cs" />
     <Compile Include="StartsEndsWithRefactoringBase.cs" />
     <Compile Include="EqualsRefactoringBase.cs" />
@@ -42,7 +43,12 @@
     <Compile Include="StartsWithRefactoringProvider.cs" />
     <Compile Include="EqualsRefactoringProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Substituters\EqualsSubstituter.cs" />
+    <Compile Include="Substituters\StartsWithEndsWithSubstituter.cs" />
+    <Compile Include="Substituters\ToLowerSubstituter.cs" />
     <Compile Include="SyntaxTreeCreators\EqualsSyntaxTreeCreator.cs" />
+    <Compile Include="SyntaxTreeCreators\ToLowerSyntaxTreeCreator.cs" />
+    <Compile Include="ToLowerrefactoringProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

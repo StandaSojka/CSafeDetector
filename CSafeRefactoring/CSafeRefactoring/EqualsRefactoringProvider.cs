@@ -12,11 +12,9 @@ namespace CSafeRefactoring
 
         protected override bool IgnoreCase => false;
 
-
         protected override bool AnalyzeAdditionalRestrictions(InvocationExpressionSyntax invocationExpr)
         {
             return invocationExpr.ArgumentList.Arguments.Count == 1;
         }
-
     }
 }

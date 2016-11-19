@@ -1,156 +1,63 @@
-﻿using System.Diagnostics;
-using System.Linq;
-using System.Threading;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
+using CSafeRefactoring.Substituters;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSafeRefactoring
 {
-    public abstract class StartsEndsWithRefactoringBase : CodeRefactoringProvider
+    public abstract class StartsEndsWithRefactoringBase : CodeRefactoringProviderBase
     {
-        protected abstract string MethodToReplaceName { get; }
-
         protected abstract string NewMethodName { get; }
-
-
-        protected abstract bool IgnoreCase { get; }
 
         public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
             var node = root.FindNode(context.Span);
 
-            if (node.GetText().ToString() != MethodToReplaceName)
+            if (!IsCurrentNodeReplacedMethod(node))
             {
                 return;
             }
 
-            var declaration =
-                root.FindNode(context.Span).Parent.AncestorsAndSelf().OfType<InvocationExpressionSyntax>().First();
+            var declaration = root
+                .FindNode(context.Span)
+                .Parent
+                .AncestorsAndSelf()
+                .OfType<InvocationExpressionSyntax>()
+                .First();
 
             if (!AnalyzeAdditionalRestrictions(declaration))
             {
                 return;
             }
 
-            var messageInvariantCulture = IgnoreCase
-                ? "Use StringComparison.InvariantCultureIgnoreCase"
-                : "Use StringComparison.InvariantCulture";
-            var messageOrdinal = IgnoreCase ? "Use StringComparison.OrdinalIgnoreCase" : "Use StringComparison.Ordinal";
-
-            var actionIvariantCulture = CodeAction.Create(messageInvariantCulture,
-                c => StringComparisonInvariantCulture(context.Document, declaration, c));
-            var actionOrdinal = CodeAction.Create(messageOrdinal,
-                c => StringComparisonOrdinal(context.Document, declaration, c));
-
-            context.RegisterRefactoring(actionIvariantCulture);
-            context.RegisterRefactoring(actionOrdinal);
+            CreateAndRegisterCodeActions(context, declaration);
         }
-
-
-        protected async Task<Document> StringComparisonInvariantCulture(Document document,
-            InvocationExpressionSyntax invocationExpr, CancellationToken cancellationToken)
-        {
-            var root = await document.GetSyntaxRootAsync(cancellationToken);
-
-            Debug.WriteLine("root");
-            var memberAccessExpressionSyntax = invocationExpr.Expression as MemberAccessExpressionSyntax;
-            if (memberAccessExpressionSyntax?.Expression == null)
-            {
-                return document;
-            }
-
-            var param1 = memberAccessExpressionSyntax.Expression;
-            var argumentList = invocationExpr.ArgumentList;
-            var param2 = argumentList.Arguments[0].Expression;
-
-            SyntaxNode newRoot;
-
-            if (IgnoreCase)
-            {
-                newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "InvariantCultureIgnoreCase"));
-            }
-            else
-            {
-                newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "InvariantCulture"));
-            }
-
-            return document.WithSyntaxRoot(newRoot);
-        }
-
-
-        protected async Task<Document> StringComparisonOrdinal(Document document, InvocationExpressionSyntax invocationExpr, CancellationToken cancellationToken)
-        {
-            var root = await document.GetSyntaxRootAsync(cancellationToken);
-
-            var memberAccessExpressionSyntax = invocationExpr.Expression as MemberAccessExpressionSyntax;
-            if (memberAccessExpressionSyntax != null)
-            {
-                var param1 = memberAccessExpressionSyntax.Expression;
-                var argumentList = invocationExpr.ArgumentList;
-                var param2 = argumentList.Arguments[0].Expression;
-
-                SyntaxNode newRoot;
-
-                if (IgnoreCase)
-                {
-                    newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "OrdinalIgnoreCase"));
-                }
-                else
-                {
-                    newRoot = root.ReplaceNode(invocationExpr, Create(param1, param2, "Ordinal"));
-                }
-
-                var newDocument = document.WithSyntaxRoot(newRoot);
-
-                return newDocument;
-            }
-
-            return document;
-        }
-
 
         protected abstract bool AnalyzeAdditionalRestrictions(InvocationExpressionSyntax invocationExpr);
 
-
-        private InvocationExpressionSyntax Create(ExpressionSyntax leftString, ExpressionSyntax rightString, string type)
+      
+        private void CreateAndRegisterCodeActions(CodeRefactoringContext context, InvocationExpressionSyntax declaration)
         {
-            return
-                SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            leftString,
-                            SyntaxFactory.IdentifierName(NewMethodName)
-                        )
-                    )
-                    .WithArgumentList(
-                        SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SeparatedList<ArgumentSyntax>(
-                                new SyntaxNodeOrToken[]
-                                {
-                                    SyntaxFactory.Argument(rightString),
-                                    SyntaxFactory.Token(
-                                        SyntaxFactory.TriviaList(),
-                                        SyntaxKind.CommaToken,
-                                        SyntaxFactory.TriviaList(
-                                            SyntaxFactory.Space
-                                        )
-                                    ),
-                                    SyntaxFactory.Argument(
-                                        SyntaxFactory.MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            SyntaxFactory.IdentifierName("StringComparison"),
-                                            SyntaxFactory.IdentifierName(type)
-                                        )
-                                    )
-                                }
-                            )
-                        )
-                    );
+            var messageInvariantCulture = GetInvariantCultureMessage();
+            var messageOrdinal = GetOrdinalMessage();
+
+            var substitutor = new StartsWithEndsWithSubstituter(context.Document, declaration, IgnoreCase, NewMethodName);
+
+            var actionIvariantCulture = CodeAction.Create(
+                messageInvariantCulture,
+                cancellationToken => substitutor.StringComparisonInvariantCulture(cancellationToken)
+            );
+
+            var actionOrdinal = CodeAction.Create(
+                messageOrdinal, 
+                cancellationToken => substitutor.StringComparisonOrdinal(cancellationToken)
+            );
+
+            context.RegisterRefactoring(actionIvariantCulture);
+            context.RegisterRefactoring(actionOrdinal);
         }
     }
 }
