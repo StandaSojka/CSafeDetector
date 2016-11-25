@@ -123,6 +123,7 @@
     <Compile Include="EqualsUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Base\Verify.cs" />
+    <Compile Include="ToUpperUnitTests.cs" />
     <Compile Include="ToLowerUnitTests.cs" />
   </ItemGroup>
   <ItemGroup>

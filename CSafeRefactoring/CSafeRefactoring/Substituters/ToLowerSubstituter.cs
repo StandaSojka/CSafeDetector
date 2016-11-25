@@ -12,10 +12,13 @@ namespace CSafeRefactoring.Substituters
 
         private InvocationExpressionSyntax InvocationExpressionSyntax { get; }
 
-        public ToLowerSubstituter(Document document, InvocationExpressionSyntax invocationExpressionSyntax)
+        private string NewMethodName { get; }
+
+        public ToLowerSubstituter(Document document, InvocationExpressionSyntax invocationExpressionSyntax, string newMethodName)
         {
             Document = document;
             InvocationExpressionSyntax = invocationExpressionSyntax;
+            NewMethodName = newMethodName;
         }
 
         public async Task<Document> Replace(CancellationToken cancellationToken)
@@ -31,7 +34,7 @@ namespace CSafeRefactoring.Substituters
             var leadingTrivia = memberAccessExpressionSyntax.Expression.GetLeadingTrivia();
             var identifier = memberAccessExpressionSyntax.Expression.WithoutLeadingTrivia();
 
-            var creator = new ToLowerSyntaxTreeCreator(identifier);
+            var creator = new ToLowerSyntaxTreeCreator(identifier, NewMethodName);
 
             var newSyntaxTree = creator.Create()
                 .WithLeadingTrivia(leadingTrivia);

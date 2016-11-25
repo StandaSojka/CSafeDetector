@@ -48,7 +48,8 @@
     <Compile Include="Substituters\ToLowerSubstituter.cs" />
     <Compile Include="SyntaxTreeCreators\EqualsSyntaxTreeCreator.cs" />
     <Compile Include="SyntaxTreeCreators\ToLowerSyntaxTreeCreator.cs" />
-    <Compile Include="ToLowerrefactoringProvider.cs" />
+    <Compile Include="ToLowerRefactoringProvider.cs" />
+    <Compile Include="ToUpperRefactoringProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

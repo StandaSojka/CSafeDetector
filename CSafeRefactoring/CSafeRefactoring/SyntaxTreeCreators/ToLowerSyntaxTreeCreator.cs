@@ -6,16 +6,19 @@ namespace CSafeRefactoring.SyntaxTreeCreators
 {
     public class ToLowerSyntaxTreeCreator
     {
+        private string NewMethodName { get; }
         private string IdentifierName { get; }
 
-        public ToLowerSyntaxTreeCreator(ExpressionSyntax identifierName)
+        public ToLowerSyntaxTreeCreator(ExpressionSyntax identifierName, string newMethodName)
         {
+            
             if (identifierName == null)
             {
                 throw new ArgumentNullException(nameof(identifierName));
             }
 
             IdentifierName = identifierName.GetText().ToString();
+            NewMethodName = newMethodName;
         }
 
         public InvocationExpressionSyntax Create()
@@ -24,7 +27,7 @@ namespace CSafeRefactoring.SyntaxTreeCreators
                 SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     SyntaxFactory.IdentifierName(IdentifierName),
-                    SyntaxFactory.IdentifierName("ToLowerInvariant")
+                    SyntaxFactory.IdentifierName(NewMethodName)
                 )
             );
         }

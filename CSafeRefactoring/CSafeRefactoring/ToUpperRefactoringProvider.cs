@@ -9,8 +9,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSafeRefactoring
 {
-    [ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(ToLowerRefactoringProvider)), Shared]
-    public class ToLowerRefactoringProvider : CodeRefactoringProviderBase
+    [ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(ToUpperRefactoringProvider)), Shared]
+    public class ToUpperRefactoringProvider : CodeRefactoringProviderBase
     {
         public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
         {
@@ -38,14 +38,14 @@ namespace CSafeRefactoring
 
         private void CreateAndRegisterCodeActions(CodeRefactoringContext context, InvocationExpressionSyntax declaration)
         {
-            var substituter = new ToLowerSubstituter(context.Document, declaration, "ToLowerInvariant");
-            var actionIvariantCulture = CodeAction.Create("Use ToLowerInvariant",
+            var substituter = new ToLowerSubstituter(context.Document, declaration, "ToUpperInvariant");
+            var actionIvariantCulture = CodeAction.Create("Use ToUpperInvariant",
                 cancellationToken => substituter.Replace(cancellationToken));
 
             context.RegisterRefactoring(actionIvariantCulture);
         }
 
-        protected override string MethodToReplaceName => "ToLowerCSafe";
+        protected override string MethodToReplaceName => "ToUpperCSafe";
 
         protected override bool IgnoreCase => false;
     }
